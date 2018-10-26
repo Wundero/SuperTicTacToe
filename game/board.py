@@ -1,20 +1,35 @@
+import copy
+
+
 class Board(object):
-    cells = [[0, 0, 0],
-             [0, 0, 0],
-             [0, 0, 0]]
+    my_cells = list()
     bid = -1
 
     def __init__(self, bid):
         self.bid = bid
+        self.my_cells = [[-bid for y in range(3)] for x in range(3)]
+        self.fix()
 
-    def get(self, i: int, j: int):
-        return self.cells[i][j]
+    def fix(self):
+        for i in range(3):
+            for j in range(3):
+                self.set_cell(i, j, 0)
 
-    def set(self, i: int, j: int, state):
-        self.cells[i][j] = state
+    def get_cell(self, i: int, j: int):
+        return self.my_cells[i][j]
+
+    def set_cell(self, i: int, j: int, state):
+        self.my_cells[i][j] = state
+
+    def full(self):
+        for i in range(3):
+            for j in range(3):
+                if self.get_cell(i, j) == 0:
+                    return False
+        return True
 
     def three_solved(self, a, b, c):
-        num = self.get(a[0], a[1]) + self.get(b[0], b[1]) + self.get(c[0], c[1])
+        num = self.get_cell(a[0], a[1]) + self.get_cell(b[0], b[1]) + self.get_cell(c[0], c[1])
         if num == 3:
             return 1
         elif num == -3:
@@ -48,9 +63,9 @@ class Board(object):
 
 
 class BigBoard(object):
-    boards = [[Board(0), Board(1), Board(2)],
-              [Board(3), Board(4), Board(5)],
-              [Board(6), Board(7), Board(8)]]
+    boards = ((Board(0), Board(1), Board(2)),
+              (Board(3), Board(4), Board(5)),
+              (Board(6), Board(7), Board(8)))
     activeBoard = [-1, -1]
 
     def three_solved(self, a, b, c):
@@ -62,6 +77,13 @@ class BigBoard(object):
             return -1
         else:
             return 0
+
+    def full(self):
+        for i in range(3):
+            for j in range(3):
+                if not self.get_board(i, j).full() and not self.get_board(i, j).solved():
+                    return False
+        return True
 
     def solved(self):
         rows = [[[], [], []], [[], [], []], [[], [], []]]
@@ -95,9 +117,9 @@ class BigBoard(object):
         return self.activeBoard[0] >= 0
 
     def play(self, i, j, state):
-        if self.get_active_board().get(i, j) != 0:
+        if self.get_active_board().get_cell(i, j) != 0:
             return False
-        self.get_active_board().set(i, j, state)
+        self.get_active_board().set_cell(i, j, state)
         return True
 
     def get_active_coords(self):
